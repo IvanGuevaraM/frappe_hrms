@@ -1,4 +1,5 @@
 import { createResource, toast } from "frappe-ui"
+import { __ } from "@/plugins/translationsPlugin"
 
 function getFileReader() {
 	const fileReader = new FileReader()
@@ -20,10 +21,11 @@ export class FileAttachment {
 				onSuccess: (fileDoc) => resolve(fileDoc),
 				onError: (error) => {
 					toast({
-						title: "Error",
-						text: `File upload failed for ${this.fileName}. ${
-							error.messages?.[0] || ""
-						}`,
+						title: __("Error"),
+						text: __("File upload failed for {0}. {1}", [
+							this.fileName,
+							error.messages?.[0] || "",
+						]),
 						icon: "alert-circle",
 						position: "bottom-center",
 						iconClasses: "text-red-500",
@@ -56,8 +58,8 @@ export class FileAttachment {
 			},
 			onError: (error) => {
 				toast({
-					title: "Error",
-					text: `File deletion failed. ${error.messages?.[0] || ""}`,
+					title: __("Error"),
+					text: __("File deletion failed. {0}", [error.messages?.[0] || ""]),
 					icon: "alert-circle",
 					position: "bottom-center",
 					iconClasses: "text-red-500",
@@ -87,16 +89,9 @@ export async function guessStatusColor(doctype, status) {
 	let color = "gray"
 	status = status.toLowerCase()
 
-	if (
-		hasWords(
-			["open", "pending", "unpaid", "review", "medium", "not approved"],
-			status
-		)
-	) {
+	if (hasWords(["open", "pending", "unpaid", "review", "medium", "not approved"], status)) {
 		color = "orange"
-	} else if (
-		hasWords(["urgent", "high", "failed", "rejected", "error"], status)
-	) {
+	} else if (hasWords(["urgent", "high", "failed", "rejected", "error"], status)) {
 		color = "red"
 	} else if (
 		hasWords(

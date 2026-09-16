@@ -1,4 +1,5 @@
 import { createResource, toast } from "frappe-ui"
+import { __ } from "@/plugins/translationsPlugin"
 import { computed } from "vue"
 import { userResource } from "@/data/user"
 
@@ -17,15 +18,11 @@ export default function useWorkflow(doctype) {
 
 	const getWorkflowStateField = () => {
 		// NOTE: checkbox labelled 'Don't Override Status' is named override_status hence the inverted logic
-		return !workflowDoc.data?.override_status
-			? workflowDoc.data?.workflow_state_field
-			: ""
+		return !workflowDoc.data?.override_status ? workflowDoc.data?.workflow_state_field : ""
 	}
 
 	const getDefaultState = (docstatus) => {
-		return workflowDoc.data?.states.find(
-			(state) => state.doc_status == docstatus
-		)
+		return workflowDoc.data?.states.find((state) => state.doc_status == docstatus)
 	}
 
 	const getTransitions = async (doc) => {
@@ -36,9 +33,7 @@ export default function useWorkflow(doctype) {
 				const isSelfApproval = userResource?.data?.name == doc.owner
 
 				return data
-					.filter(
-						(transition) => transition.allow_self_approval || !isSelfApproval
-					)
+					.filter((transition) => transition.allow_self_approval || !isSelfApproval)
 					.map((transition) => transition.action)
 			},
 		})
@@ -47,9 +42,7 @@ export default function useWorkflow(doctype) {
 	}
 
 	const getDocumentStateRoles = (state) => {
-		return workflowDoc.data?.states
-			.filter((s) => s.state == state)
-			.map((s) => s.allow_edit)
+		return workflowDoc.data?.states.filter((s) => s.state == state).map((s) => s.allow_edit)
 	}
 
 	const isReadOnly = (doc) => {
@@ -68,8 +61,8 @@ export default function useWorkflow(doctype) {
 			params: { doc: doc, action: action },
 			onSuccess() {
 				toast({
-					title: "Success",
-					text: `Workflow action '${action}' applied successfully`,
+					title: __("Success"),
+					text: __("Workflow action '{0}' applied successfully", [action]),
 					icon: "check-circle",
 					position: "bottom-center",
 					iconClasses: "text-green-500",
@@ -77,8 +70,8 @@ export default function useWorkflow(doctype) {
 			},
 			onError() {
 				toast({
-					title: "Error",
-					text: `Error applying workflow action: ${action}`,
+					title: __("Error"),
+					text: __("Error applying workflow action: {0}", [action]),
 					icon: "alert-circle",
 					position: "bottom-center",
 					iconClasses: "text-red-500",
