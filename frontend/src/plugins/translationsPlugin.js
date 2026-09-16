@@ -1,80 +1,77 @@
 function makeTranslationFunction() {
-	let messages = {};
+	let messages = {}
 	return {
 		translate,
-		load: () => Promise.allSettled([
-			setup(),
-			// TODO: load dayjs locales
-		]),
+		load: () => Promise.allSettled([setup()]),
 	}
 
 	async function setup() {
 		if (window.frappe?.boot?.__messages) {
-			messages = window.frappe?.boot?.__messages;
-			return;
+			messages = window.frappe?.boot?.__messages
+			return
 		}
 
-		const url = new URL("/api/method/frappe.translate.load_all_translations", location.origin);
-		url.searchParams.append("lang", window.frappe?.boot?.lang ?? navigator.language);
-		url.searchParams.append("hash", window.frappe?.boot?.translations_hash || window._version_number || Math.random()); // for cache busting
+		const url = new URL("/api/method/frappe.translate.load_all_translations", location.origin)
+		url.searchParams.append("lang", window.frappe?.boot?.lang ?? navigator.language)
+		url.searchParams.append(
+			"hash",
+			window.frappe?.boot?.translations_hash || window._version_number || Math.random()
+		) // for cache busting
 		// url.searchParams.append("app", "hrms");
 
 		try {
-			const response = await fetch(url);
-			messages = await response.json() || {}
+			const response = await fetch(url)
+			messages = (await response.json()) || {}
 		} catch (error) {
 			console.error("Failed to fetch translations:", error)
 		}
 	}
 
 	function translate(txt, replace, context = null) {
-		if (!txt || typeof txt != "string") return txt;
+		if (!txt || typeof txt != "string") return txt
 
-		let translated_text = "";
-		let key = txt;
+		let translated_text = ""
+		let key = txt
 		if (context) {
-			translated_text = messages[`${key}:${context}`];
+			translated_text = messages[`${key}:${context}`]
 		}
 		if (!translated_text) {
-			translated_text = messages[key] || txt;
+			translated_text = messages[key] || txt
 		}
 		if (replace && typeof replace === "object") {
-			translated_text = format(translated_text, replace);
+			translated_text = format(translated_text, replace)
 		}
 
-		return translated_text;
+		return translated_text
 	}
 
 	function format(str, args) {
-		if (str == undefined) return str;
+		if (str == undefined) return str
 
-		let unkeyed_index = 0;
-		return str.replace(
-			/\{(\w*)\}/g,
-			(match, key) => {
-				if (key === "") {
-					key = unkeyed_index;
-					unkeyed_index++;
-				}
-				if (key == +key) {
-					return args[key] !== undefined ? args[key] : match;
-				}
+		let unkeyed_index = 0
+		return str.replace(/\{(\w*)\}/g, (match, key) => {
+			if (key === "") {
+				key = unkeyed_index
+				unkeyed_index++
 			}
-		);
+			if (key == +key) {
+				return args[key] !== undefined ? args[key] : match
+			}
+		})
 	}
 }
 
-const { translate, load } = makeTranslationFunction();
-export const __ = translate;
+const { translate, load } = makeTranslationFunction()
+export const __ = translate
 
 export const translationsPlugin = {
 	async isReady() {
-		await load();
+		await load()
 	},
 	install(/** @type {import('vue').App} */ app, options) {
-		const __ = translate;
+		const __ = translate
 		// app.mixin({ methods: { __ } })
-		app.config.globalProperties.__ = __;
-		app.provide("$translate", __);
+		app.config.globalProperties.__ = __
+		app.provide("$translate", __)
 	},
 }

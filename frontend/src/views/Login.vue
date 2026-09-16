@@ -1,10 +1,7 @@
 <template>
 	<ion-page>
 		<ion-content class="ion-padding">
-			<div
-				v-if="resetPassword.showDialog"
-				class="flex h-screen w-screen flex-col bg-white"
-			>
+			<div v-if="resetPassword.showDialog" class="flex h-screen w-screen flex-col bg-white">
 				<header class="flex items-center justify-between px-6 py-4">
 					<div class="text-lg font-semibold text-gray-900">
 						{{ __("Reset Password") }}
@@ -40,7 +37,11 @@
 				</div>
 
 				<div class="mx-auto mt-10 w-full px-8 sm:w-96">
-					<form v-if="!user_pass_login_disabled.data" class="flex flex-col space-y-4" @submit.prevent="submit">
+					<form
+						v-if="!user_pass_login_disabled.data"
+						class="flex flex-col space-y-4"
+						@submit.prevent="submit"
+					>
 						<Input
 							:label="__('Email')"
 							:placeholder="__('johndoe@mail.com')"
@@ -74,7 +75,12 @@
 					</form>
 
 					<template v-if="authProviders.data?.length">
-						<div v-if="!user_pass_login_disabled.data" class="text-center text-sm text-gray-600 my-4">or</div>
+						<div
+							v-if="!user_pass_login_disabled.data"
+							class="text-center text-sm text-gray-600 my-4"
+						>
+							{{ __("or") }}
+						</div>
 						<div class="space-y-4">
 							<a
 								v-for="provider in authProviders.data"
@@ -88,7 +94,9 @@
 						</div>
 					</template>
 
-					<div v-else-if="user_pass_login_disabled.data" class="text-center text-gray-600 py-8">{{ __("No login methods are available. Please contact your administrator.") }}</div>
+					<div v-else-if="user_pass_login_disabled.data" class="text-center text-gray-600 py-8">
+						{{ __("No login methods are available. Please contact your administrator.") }}
+					</div>
 				</div>
 			</div>
 			<Dialog v-model="otp.showDialog">
@@ -183,7 +191,7 @@ async function submit(e) {
 
 const user_pass_login_disabled = createResource({
 	url: "hrms.api.system_settings.get_user_pass_login_disabled",
-	method: 'GET',
+	method: "GET",
 	initialData: 1,
 	auto: true,
 })
