@@ -260,7 +260,7 @@ class TestPayrollEntry(HRMSTestSuite):
 		"Payroll Settings", {"process_payroll_accounting_entry_based_on_employee": 1}
 	)
 	def test_loan_with_settings_enabled(self):
-		from lending.loan_management.doctype.loan.test_loan import make_loan_disbursement_entry
+		from lending.tests.test_utils import make_loan_disbursement_entry
 
 		frappe.db.delete("Loan")
 
@@ -308,7 +308,7 @@ class TestPayrollEntry(HRMSTestSuite):
 		"Payroll Settings", {"process_payroll_accounting_entry_based_on_employee": 0}
 	)
 	def test_loan_with_settings_disabled(self):
-		from lending.loan_management.doctype.loan.test_loan import make_loan_disbursement_entry
+		from lending.tests.test_utils import make_loan_disbursement_entry
 
 		frappe.db.delete("Loan")
 
@@ -421,6 +421,42 @@ class TestPayrollEntry(HRMSTestSuite):
 
 		self.assertEqual(payroll_entry.status, "Submitted")
 		self.assertEqual(payroll_entry.error_message, "")
+
+	def test_salary_slip_that_fails_to_submit_stays_draft(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		employee = make_employee("test_submitted_slip@payroll.com", company=company.name)
+		failing_employee = make_employee("test_failed_slip@payroll.com", company=company.name)
+		setup_salary_structure(employee, company)
+		setup_salary_structure(failing_employee, company)
+
+		dates = get_start_end_dates("Monthly", nowdate())
+		payroll_entry = get_payroll_entry(
+			start_date=dates.start_date,
+			end_date=dates.end_date,
+			payable_account=company.default_payroll_payable_account,
+			currency=company.default_currency,
+			company=company.name,
+			cost_center="Main - _TC",
+		)
+		payroll_entry.submit()
+
+		def reject_loan_repayment(salary_slip):
+			if salary_slip.employee == failing_employee:
+				raise frappe.ValidationError
+
+		with patch(
+			"hrms.payroll.doctype.salary_slip.salary_slip.make_loan_repayment_entry",
+			side_effect=reject_loan_repayment,
+		):
+			payroll_entry.submit_salary_slips()
+
+		docstatus_by_employee = dict(
+			frappe.get_all(
+				"Salary Slip", {"payroll_entry": payroll_entry.name}, ["employee", "docstatus"], as_list=True
+			)
+		)
+		self.assertEqual(docstatus_by_employee[failing_employee], 0)
+		self.assertEqual(docstatus_by_employee[employee], 1)
 
 	def test_payroll_entry_cancellation(self):
 		company_doc = frappe.get_doc("Company", "_Test Company")
@@ -874,7 +910,7 @@ class TestPayrollEntry(HRMSTestSuite):
 		self.run_test_for_loan_repayment_from_salary()
 
 	def run_test_for_loan_repayment_from_salary(self):
-		from lending.loan_management.doctype.loan.test_loan import make_loan_disbursement_entry
+		from lending.tests.test_utils import make_loan_disbursement_entry
 
 		frappe.db.delete("Loan")
 		applicant, branch, currency, payroll_payable_account = setup_lending()
@@ -937,8 +973,7 @@ class TestPayrollEntry(HRMSTestSuite):
 		"Payroll Settings", {"process_payroll_accounting_entry_based_on_employee": 0}
 	)
 	def test_loan_repayment_value_date_for_future_payroll(self):
-		from lending.loan_management.doctype.loan.test_loan import make_loan_disbursement_entry
-		from lending.tests.test_utils import create_loan
+		from lending.tests.test_utils import create_loan, make_loan_disbursement_entry
 
 		frappe.db.delete("Loan")
 		applicant, branch, currency, payroll_payable_account = setup_lending()
@@ -1526,12 +1561,12 @@ def create_assignments_with_cost_centers(employee1, employee2):
 
 
 def setup_lending():
-	from lending.loan_management.doctype.loan.test_loan import (
+	from lending.tests.test_utils import (
+		create_demand_offset_order,
 		create_loan_accounts,
 		create_loan_product,
 		set_loan_settings_in_company,
 	)
-	from lending.tests.test_utils import create_demand_offset_order
 
 	create_demand_offset_order(
 		"Test EMI Based Standard Loan Demand Offset Order",
@@ -1572,6 +1607,7 @@ def setup_lending():
 			penalty_income_account="Penalty Income Account - _TC",
 			repayment_schedule_type="Monthly as per repayment start date",
 			collection_offset_sequence_for_standard_asset="Test EMI Based Standard Loan Demand Offset Order",
+			collection_offset_sequence_for_sub_standard_asset="Test EMI Based Standard Loan Demand Offset Order",
 		)
 
 	return (

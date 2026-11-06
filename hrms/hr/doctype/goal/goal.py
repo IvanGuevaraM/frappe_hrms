@@ -26,7 +26,7 @@ class Goal(NestedSet):
 
 		validate_active_employee(self.employee)
 		self.validate_parent_fields()
-		self.validate_from_to_dates(self.start_date, self.end_date)
+		self.validate_from_to_dates("start_date", "end_date")
 		self.validate_progress()
 		self.set_status()
 
@@ -138,6 +138,9 @@ class Goal(NestedSet):
 def get_children(doctype: str, parent: str, is_root: bool = False, **filters) -> list[dict]:
 	query_filters = [["status", "!=", "Archived"]]
 	query_or_filters = []
+
+	if filters.get("company"):
+		query_filters.append(["company", "=", filters.get("company")])
 
 	if filters.get("employee"):
 		query_filters.append(["employee", "=", filters.get("employee")])

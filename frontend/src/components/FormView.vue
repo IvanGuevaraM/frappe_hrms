@@ -6,7 +6,7 @@
 			>
 				<Button
 					variant="ghost"
-					class="!pl-0 hover:bg-white"
+					class="!ps-0 hover:bg-white"
 					@click="router.back()"
 				>
 					<FeatherIcon name="chevron-left" class="h-5 w-5" />
@@ -33,7 +33,7 @@
 					/>
 
 					<Dropdown
-						class="ml-auto"
+						class="ms-auto"
 						:options="[
 							{
 								label: __('Delete'),
@@ -67,7 +67,7 @@
 						class="px-4 sticky top-0 z-[100] bg-white text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700"
 					>
 						<ul class="flex -mb-px overflow-auto hide-scrollbar">
-							<li class="mr-2 whitespace-nowrap" v-for="tab in tabs">
+							<li class="me-2 whitespace-nowrap" v-for="tab in tabs">
 								<button
 									@click="activeTab = tab.name"
 									class="inline-block py-4 px-2 border-b-2 border-transparent rounded-t-lg"
@@ -336,6 +336,7 @@ import WorkflowActionSheet from "@/components/WorkflowActionSheet.vue"
 import { FileAttachment, guessStatusColor } from "@/composables"
 import useWorkflow from "@/composables/workflow"
 import { getCompanyCurrency } from "@/data/currencies"
+import { getLeaveStatus } from "@/data/leaves"
 import { formatCurrency } from "@/utils/formatters"
 import { useDownloadPDF } from "@/utils/commonUtils"
 
@@ -420,6 +421,8 @@ const status = computed(() => {
 		const stateField = workflow.value.getWorkflowStateField()
 		if (stateField) return formModel.value[stateField]
 	}
+
+	if (props.doctype === "Leave Application") return getLeaveStatus(formModel.value)
 
 	return formModel.value.status || formModel.value.approval_status
 })

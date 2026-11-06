@@ -24,7 +24,7 @@
 
 	<div
 		v-else-if="['Small Text', 'Text', 'Long Text'].includes(props.fieldtype)"
-		class="text-gray-900 text-base bg-gray-100 rounded py-3 pl-3 mt-2"
+		class="text-gray-900 text-base bg-gray-100 rounded py-3 ps-3 mt-2"
 	>
 		{{ props.value }}
 	</div>
@@ -75,6 +75,8 @@ const colorMap = {
 	Approved: "green",
 	Rejected: "red",
 	Open: "orange",
+	"Approved & Draft": "gray",
+	"Rejected & Draft": "gray",
 }
 
 const getCoordinates = (value) => {

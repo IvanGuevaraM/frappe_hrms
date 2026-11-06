@@ -12,9 +12,6 @@ frappe.ui.form.on("Employee Advance", {
 		});
 
 		frm.set_query("advance_account", function () {
-			if (!frm.doc.employee) {
-				frappe.msgprint(__("Please select employee first"));
-			}
 			return {
 				filters: {
 					root_type: "Asset",
@@ -167,7 +164,9 @@ frappe.ui.form.on("Employee Advance", {
 						employee: frm.doc.employee,
 						company: frm.doc.company,
 						employee_advance_name: frm.doc.name,
-						return_amount: flt(frm.doc.paid_amount - frm.doc.claimed_amount),
+						return_amount: flt(
+							frm.doc.paid_amount - frm.doc.claimed_amount - frm.doc.return_amount,
+						),
 						advance_account: frm.doc.advance_account,
 						mode_of_payment: frm.doc.mode_of_payment,
 						currency: frm.doc.currency,
