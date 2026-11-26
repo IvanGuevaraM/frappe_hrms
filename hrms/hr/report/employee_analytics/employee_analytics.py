@@ -94,8 +94,8 @@ def get_chart_data(parameters, filters):
 	total_employee = frappe.db.count("Employee", {"status": "Active", "company": filters.get("company")})
 	others = total_employee - sum(values)
 
-	label.append("Not Set")
+	label.append(_("Not Set"))
 	values.append(others)
-	chart = {"data": {"labels": label, "datasets": [{"name": "Employees", "values": values}]}}
+	chart = {"data": {"labels": label, "datasets": [{"name": _("Employees"), "values": values}]}}
 	chart["type"] = "donut"
 	return chart

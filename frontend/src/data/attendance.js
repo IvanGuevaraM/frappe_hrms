@@ -1,12 +1,13 @@
 import { createResource } from "frappe-ui"
 import { employeeResource } from "./employee"
+import { __ } from "@/plugins/translationsPlugin"
 
 import dayjs from "@/utils/dayjs"
 
 
 export const getDates = (shift) => {
 	const fromDate = dayjs(shift.from_date).format("D MMM")
-	const toDate = shift.to_date ? dayjs(shift.to_date).format("D MMM") : "Ongoing"
+	const toDate = shift.to_date ? dayjs(shift.to_date).format("D MMM") : __("Ongoing")
 	return fromDate == toDate ? fromDate : `${fromDate} - ${toDate}`
 }
 
@@ -19,7 +20,7 @@ export const getTotalDays = (shift) => {
 
 export const getShiftDates = (shift) => {
 	const startDate = dayjs(shift.start_date).format("D MMM")
-	const endDate = shift.end_date ? dayjs(shift.end_date).format("D MMM") : "Ongoing"
+	const endDate = shift.end_date ? dayjs(shift.end_date).format("D MMM") : __("Ongoing")
 	return startDate == endDate ? startDate : `${startDate} - ${endDate}`
 }
 
